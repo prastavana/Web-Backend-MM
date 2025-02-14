@@ -1,11 +1,11 @@
 const express = require("express");
 const cors = require("cors");
-const connectDb = require("./config/db"); // Assuming you have a DB connection utility
-const AuthRouter = require("./routes/authRoutes"); // Your authentication routes
-const protectedRouter = require("./routes/protectedRoutes"); // Protected routes
-const uploadMiddleware = require('./middleware/uploadMiddleware'); // If you're handling file uploads
-const songController = require("./controllers/songController"); // If you have a song controller for handling song requests
-
+const connectDb = require("./config/db");
+const AuthRouter = require("./routes/authRoutes");
+const protectedRouter = require("./routes/protectedRoutes");
+const songRoutes = require("./routes/songRoutes"); // Add song routes
+const uploadMiddleware = require('./middleware/uploadMiddleware');
+const path = require("path"); // To serve static files for uploads
 const app = express();
 
 // Connect to MongoDB
@@ -22,16 +22,19 @@ app.use(cors({
 app.use(express.json());
 
 // Authentication and Protected Routes
-app.use("/api/auth", AuthRouter); // Route for authentication
-app.use("/api/protected", protectedRouter); // Protected route (possibly requiring authentication)
+app.use("/api/auth", AuthRouter);
+app.use("/api/protected", protectedRouter);
 
-// Song Routes (assuming you want to handle song uploads)
-app.post('/api/songs/add-chord', uploadMiddleware.fields([{ name: 'docxFile' }, { name: 'chordDiagrams', maxCount: 10 }]), songController.addSong);
+// Song Routes
+app.use("/api/songs", songRoutes); // Make sure this is added
+
+// Middleware for handling file uploads
+app.use(uploadMiddleware);
 
 // Serve static files (uploads folder for files like DOCX, images)
-app.use('/uploads', express.static('uploads'));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Handle other routes or fallback (for 404 errors)
+// Handle other routes or fallback
 app.use((req, res, next) => {
     res.status(404).json({ message: "Route not found" });
 });

@@ -1,11 +1,13 @@
 // routes/songRoutes.js
-
 const express = require('express');
 const router = express.Router();
+const songController = require('../controller/songController');
 const uploadMiddleware = require('../middleware/uploadMiddleware');
-const songController = require('../controllers/songController');
 
-// Route for adding songs with file uploads
-router.post('/add-chord', uploadMiddleware.fields([{ name: 'docxFile' }, { name: 'chordDiagrams', maxCount: 10 }]), songController.addSong);
+// Route for creating songs
+router.post('/songs', uploadMiddleware, songController.createSong);
+
+// Route for parsing DOCX files
+router.post('/songs/parse-docx', uploadMiddleware, songController.parseDocxFile);
 
 module.exports = router;
