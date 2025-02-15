@@ -26,38 +26,50 @@ const parseDocxText = (filePath) => {
     });
 };
 
-// Function to convert raw text into a structured format (lyrics and chords)
 const parseDocxTextToLyrics = (text) => {
-    const lines = text.split("\n");  // Split the raw text into lines
+    const lines = text.split("\n");
     const parsedLyrics = [];
-
     let currentChords = [];
     let currentLyrics = '';
+    let currentSection = '';
 
     lines.forEach((line) => {
-        // Match lines starting with a chord pattern, e.g., "G Em"
-        const chordMatch = line.match(/^([A-Za-z#]+(?:\s[A-Za-z#]+)*)/); // Match chords
+        const sectionMatch = line.match(/^(Verse|Chorus|Intro|Bridge)\s*(\d*)/i); // Detect sections like "Verse 1", "Chorus", etc.
+
+        if (sectionMatch) {
+            if (currentChords.length > 0 && currentLyrics.trim()) {
+                parsedLyrics.push({
+                    section: currentSection || "Unknown",
+                    chords: currentChords,
+                    lyrics: currentLyrics
+                });
+            }
+            currentSection = sectionMatch[0]; // Set the current section (e.g., "Verse 1")
+            currentChords = [];
+            currentLyrics = '';
+        }
+
+        const chordMatch = line.match(/^([A-G][#b]?m?(?:\s[A-G][#b]?m?)*)/);
 
         if (chordMatch) {
-            // If a new chord pattern is found, push the existing chords and lyrics
             if (currentChords.length > 0 && currentLyrics.trim()) {
-                parsedLyrics.push({ chords: currentChords, lyrics: currentLyrics });
+                parsedLyrics.push({ section: currentSection || "Unknown", chords: currentChords, lyrics: currentLyrics });
             }
-            // Update current chords and lyrics
-            currentChords = chordMatch[0].split(' ').filter(Boolean); // Split chords by space
-            currentLyrics = line.replace(chordMatch[0], "").trim(); // Remove the chords from lyrics
+            currentChords = chordMatch[0].split(' ').filter(Boolean);
+            currentLyrics = line.replace(chordMatch[0], "").trim();
         } else {
-            // If no chord pattern, continue with the current lyrics
             currentLyrics += (currentLyrics ? "\n" : "") + line.trim();
         }
     });
 
-    // Push the final parsed lyrics and chords
     if (currentChords.length > 0 && currentLyrics.trim()) {
-        parsedLyrics.push({ chords: currentChords, lyrics: currentLyrics });
+        parsedLyrics.push({ section: currentSection || "Unknown", chords: currentChords, lyrics: currentLyrics });
     }
 
-    return parsedLyrics;  // Return the parsed lyrics and chords
+    return parsedLyrics;
 };
 
-module.exports = { parseDocxText };  // Export the function to be used elsewhere
+
+
+
+module.exports = parseDocxText;
