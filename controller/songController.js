@@ -22,9 +22,16 @@ exports.createSong = async (req, res) => {
         // Handle uploaded DOCX file
         if (req.files && req.files.docxFile) {
             docxFile = req.files.docxFile[0].path;
+            console.log("Uploaded DOCX file path:", docxFile);  // Add log to confirm the file path
+
             // Parse the DOCX file and extract text
             docxText = await parseDocxText(docxFile);  // Wait for DOCX parsing
             console.log("Parsed DOCX Text:", docxText);  // Log the parsed text
+
+            // If DOCX text is empty, log a specific error
+            if (!docxText || docxText.length === 0) {
+                console.log("No content found in DOCX file.");
+            }
         }
 
         // Create new song record
@@ -46,6 +53,8 @@ exports.createSong = async (req, res) => {
         return res.status(500).json({ message: 'Error adding song' });
     }
 };
+
+
 
 
 // Handle parsing of DOCX file (utility function)
@@ -80,18 +89,20 @@ exports.getAllSongs = async (req, res) => {
 };
 // Fetch a song by ID
 // controllers/songController.js
+// controllers/songController.js
 exports.getSongById = async (req, res) => {
     try {
-        const songId = req.params.id;  // Get the song ID from the URL parameter
-        const song = await Song.findById(songId);  // Find the song by ID
+        const songId = req.params.id;
+        const song = await Song.findById(songId);
 
         if (!song) {
             return res.status(404).json({ message: 'Song not found' });
         }
 
-        return res.status(200).json(song);  // Return the song data, including parsed DOCX text
+        return res.status(200).json(song);  // Make sure `docxText` is included here
     } catch (error) {
         console.error('Error fetching song by ID:', error);
         return res.status(500).json({ message: 'Error fetching song details' });
     }
 };
+

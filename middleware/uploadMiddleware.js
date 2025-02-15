@@ -1,14 +1,13 @@
-// middleware/uploadMiddleware.js
 const multer = require('multer');
 const path = require('path');
 
 // Set up multer for file uploads
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, './uploads/');
+        cb(null, './uploads/');  // Save files to the "uploads" folder
     },
     filename: (req, file, cb) => {
-        cb(null, Date.now() + path.extname(file.originalname));
+        cb(null, Date.now() + path.extname(file.originalname));  // Ensure unique filenames
     },
 });
 

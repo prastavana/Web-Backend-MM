@@ -1,4 +1,3 @@
-// models/Song.js
 const mongoose = require('mongoose');
 
 const songSchema = new mongoose.Schema({
@@ -25,6 +24,9 @@ const songSchema = new mongoose.Schema({
     ],
     docxFile: {
         type: String, // path to the DOCX file
+    },
+    docxText: {
+        type: [Object],  // To store the parsed DOCX content as structured data
     },
 });
 
