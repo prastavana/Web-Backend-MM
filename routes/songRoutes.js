@@ -9,5 +9,12 @@ router.post('/songs', uploadMiddleware, songController.createSong);
 
 // Route for parsing DOCX files
 router.post('/songs/parse-docx', uploadMiddleware, songController.parseDocxFile);
+// Add this to your existing songRoutes.js
+
+// Route for fetching all songs
+router.get('/getsongs', songController.getAllSongs);
+
+module.exports = router;
+
 
 module.exports = router;

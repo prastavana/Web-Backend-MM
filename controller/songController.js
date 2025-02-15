@@ -45,3 +45,27 @@ exports.parseDocxFile = (req, res) => {
     // You can call your DOCX parsing utility here to extract lyrics from the DOCX file.
     res.json({ message: 'DOCX file parsed successfully', docxFilePath });
 };
+
+// Add this to your existing songController.js
+
+// Fetch all songs from the database
+// In songController.js
+
+// Fetch all songs, optionally filtered by instrument
+exports.getAllSongs = async (req, res) => {
+    try {
+        const instrument = req.query.instrument; // Get the instrument from query
+        let songs;
+
+        if (instrument) {
+            songs = await Song.find({ selectedInstrument: instrument }); // Filter by instrument
+        } else {
+            songs = await Song.find(); // Fetch all songs
+        }
+
+        return res.status(200).json({ songs });
+    } catch (error) {
+        console.error('Error fetching songs:', error);
+        return res.status(500).json({ message: 'Error fetching songs' });
+    }
+};
