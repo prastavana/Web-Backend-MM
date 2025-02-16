@@ -1,19 +1,19 @@
-const multer = require('multer');
-const path = require('path');
+const multer = require("multer");
 
-// Set up multer for file uploads
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, './uploads/');  // Save files to the "uploads" folder
+        cb(null, "./uploads/");
     },
     filename: (req, file, cb) => {
-        cb(null, Date.now() + path.extname(file.originalname));  // Ensure unique filenames
+        cb(null, Date.now() + "." + file.originalname.split(".").pop());
     },
 });
 
-const upload = multer({ storage }).fields([
-    { name: 'chordDiagrams', maxCount: 10 },
-    { name: 'docxFile', maxCount: 1 },
+const upload = multer({
+    storage
+}).fields([
+    { name: "chordDiagrams", maxCount: 5 },
+    { name: "docxFiles", maxCount: 10 },
 ]);
 
 module.exports = upload;

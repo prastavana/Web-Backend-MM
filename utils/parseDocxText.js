@@ -1,71 +1,53 @@
 const mammoth = require('mammoth');
-const fs = require('fs');
-const path = require('path');
 
-// Function to parse the DOCX file and extract text
-const parseDocxText = (filePath) => {
-    return new Promise((resolve, reject) => {
-        mammoth.extractRawText({ path: filePath })
-            .then((result) => {
-                const extractedText = result.value.trim();  // Extract raw text and trim whitespace
-                console.log("Extracted Text from DOCX:", extractedText);  // Log for debugging
+const parseDocxText = async (filePath) => {
+    try {
+        console.log(`Processing file: ${filePath}`);
+        const result = await mammoth.extractRawText({ path: filePath });
+        const extractedText = result.value.trim();
 
-                if (extractedText) {
-                    const lyrics = parseDocxTextToLyrics(extractedText);
-                    console.log("Parsed Lyrics:", lyrics);  // Log parsed lyrics
-                    resolve(lyrics);  // If there is text, resolve with parsed lyrics
-                } else {
-                    console.log("No text found in DOCX");
-                    resolve([]);  // Return an empty array if no text was found
-                }
-            })
-            .catch((err) => {
-                console.error("Error extracting text from DOCX:", err);
-                reject(err);  // Reject the promise if there’s an error
-            });
-    });
+        if (!extractedText) {
+            console.log("No text found in DOCX");
+            return []; // Return an empty array if no content
+        }
+
+        console.log("Extracted Text:", extractedText);
+        return parseDocxTextToLyrics(extractedText);
+    } catch (error) {
+        console.error("Error extracting text from DOCX:", error);
+        throw error;
+    }
 };
 
 const parseDocxTextToLyrics = (text) => {
-    const lines = text.split("\n");
+    const lines = text.split("\n").map(line => line.replace(/\r/g, '').trim()); // Trim unnecessary spaces but keep alignment
     const parsedLyrics = [];
-    let currentChords = [];
-    let currentLyrics = '';
-    let currentSection = '';
+    let currentSection = 'Verse';
+    let currentLyricsBlock = [];
 
     lines.forEach((line) => {
-        const sectionMatch = line.match(/^(Verse|Chorus|Intro|Bridge)\s*(\d*)/i); // Detect sections like "Verse 1", "Chorus", etc.
+        // Ignore completely empty lines
+        if (!line.trim()) return;
 
+        // Detect section titles
+        const sectionMatch = line.match(/^(Verse|Chorus|Intro|Bridge|Outro|Pre-Chorus|Solo)(\s*\d*)$/i);
         if (sectionMatch) {
-            if (currentChords.length > 0 && currentLyrics.trim()) {
-                parsedLyrics.push({
-                    section: currentSection || "Unknown",
-                    chords: currentChords,
-                    lyrics: currentLyrics
-                });
+            if (currentLyricsBlock.length) {
+                parsedLyrics.push({ section: currentSection, lyrics: currentLyricsBlock.join("\n") });
             }
-            currentSection = sectionMatch[0]; // Set the current section (e.g., "Verse 1")
-            currentChords = [];
-            currentLyrics = '';
+            currentSection = sectionMatch[1].trim();
+            currentLyricsBlock = [];
+            return;
         }
 
-        const chordMatch = line.match(/^([A-G][#b]?m?(?:\s[A-G][#b]?m?)*)/);
-
-        if (chordMatch) {
-            if (currentChords.length > 0 && currentLyrics.trim()) {
-                parsedLyrics.push({ section: currentSection || "Unknown", chords: currentChords, lyrics: currentLyrics });
-            }
-            currentChords = chordMatch[0].split(' ').filter(Boolean);
-            currentLyrics = line.replace(chordMatch[0], "").trim();
-        } else {
-            currentLyrics += (currentLyrics ? "\n" : "") + line.trim();
-        }
+        currentLyricsBlock.push(line);
     });
 
-    if (currentChords.length > 0 && currentLyrics.trim()) {
-        parsedLyrics.push({ section: currentSection || "Unknown", chords: currentChords, lyrics: currentLyrics });
+    if (currentLyricsBlock.length) {
+        parsedLyrics.push({ section: currentSection, lyrics: currentLyricsBlock.join("\n") });
     }
 
+    console.log("Parsed lyrics:", parsedLyrics);
     return parsedLyrics;
 };
 
