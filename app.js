@@ -5,6 +5,8 @@ const AuthRouter = require("./routes/authRoutes");
 const protectedRouter = require("./routes/protectedRoutes");
 const songRoutes = require("./routes/songRoutes"); // Add song routes
 const uploadMiddleware = require('./middleware/uploadMiddleware');
+const session = require("./routes/songRoutes");
+const sessionRoutes = require('./routes/sessionRoutes');
 const path = require("path"); // To serve static files for uploads
 const app = express();
 
@@ -24,6 +26,8 @@ app.use(express.json());
 // Authentication and Protected Routes
 app.use("/api/auth", AuthRouter);
 app.use("/api/protected", protectedRouter);
+app.use('/api/sessions', sessionRoutes);
+
 
 // Song Routes
 app.use("/api/songs", songRoutes); // Make sure this is added

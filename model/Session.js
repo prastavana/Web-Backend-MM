@@ -3,34 +3,39 @@ const mongoose = require('mongoose');
 const sessionSchema = new mongoose.Schema({
     instrument: {
         type: String,
-        required: true,
+        enum: ['Guitar', 'Piano', 'Ukulele'],
+        required: true
     },
     day: {
         type: String,
-        required: true,
+        enum: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7'],
+        required: true
     },
     title: {
         type: String,
-        required: true,
+        required: true
     },
     description: {
         type: String,
-        required: true,
+        required: true
     },
     duration: {
         type: Number,
         required: true,
+        min: [1, 'Duration must be greater than 0']
     },
     instructions: {
         type: String,
-        required: true,
+        required: true
     },
     file: {
-        type: String, // This can store the URL to the uploaded file
-        default: null,
-    },
-}, { timestamps: true });
+        type: String, // Store file URL (after upload to a storage server like AWS S3 or local)
+        default: null
+    }
+}, {
+    timestamps: true // automatically adds createdAt and updatedAt fields
+});
 
-const Session = mongoose.model('PracticeSession', practiceSessionSchema);
+const Session = mongoose.model('Session', sessionSchema);
 
 module.exports = Session;
