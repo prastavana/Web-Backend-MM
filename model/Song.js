@@ -1,18 +1,18 @@
 const mongoose = require("mongoose");
 
 const songSchema = new mongoose.Schema({
-    songName: { type: String, required: true },
-    selectedInstrument: { type: String, required: true },
-    lyrics: [
-        {
-            section: String,
-            lyrics: String, // Store lyrics as text
-            parsedDocxFile: String // Store parsed DOCX content here
-        }
-    ],
+    songName: String,
+    selectedInstrument: String,
+    lyrics: [{
+        section: String,
+        lyrics: String,
+        parsedDocxFile: [String],  // Array of strings for each lyric's parsed DOCX content
+    }],
     chordDiagrams: [String],
-    docxFiles: [String] // Store the DOCX file paths
+    docxFiles: [String],
 });
 
 const Song = mongoose.model("Song", songSchema);
+
+// Correct export statement
 module.exports = Song;

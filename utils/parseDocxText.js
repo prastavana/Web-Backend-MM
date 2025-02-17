@@ -20,16 +20,14 @@ const parseDocxText = async (filePath) => {
 };
 
 const parseDocxTextToLyrics = (text) => {
-    const lines = text.split("\n").map(line => line.replace(/\r/g, '').trim()); // Trim unnecessary spaces but keep alignment
+    const lines = text.split("\n").map(line => line.replace(/\r/g, '').trim());
     const parsedLyrics = [];
     let currentSection = 'Verse';
     let currentLyricsBlock = [];
 
     lines.forEach((line) => {
-        // Ignore completely empty lines
         if (!line.trim()) return;
 
-        // Detect section titles
         const sectionMatch = line.match(/^(Verse|Chorus|Intro|Bridge|Outro|Pre-Chorus|Solo)(\s*\d*)$/i);
         if (sectionMatch) {
             if (currentLyricsBlock.length) {
@@ -47,11 +45,8 @@ const parseDocxTextToLyrics = (text) => {
         parsedLyrics.push({ section: currentSection, lyrics: currentLyricsBlock.join("\n") });
     }
 
-    console.log("Parsed lyrics:", parsedLyrics);
+    console.log("Parsed lyrics:", JSON.stringify(parsedLyrics, null, 2)); // ✅ Logs correctly formatted JSON
     return parsedLyrics;
 };
-
-
-
 
 module.exports = parseDocxText;

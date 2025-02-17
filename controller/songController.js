@@ -4,6 +4,8 @@ const fs = require('fs');
 const parseDocxText = require("../utils/parseDocxText");  // Ensure this utility function exists
 
 // ✅ Create a new song with DOCX parsing
+// ✅ Create a new song with DOCX parsing
+// ✅ Create a new song with DOCX parsing
 exports.createSong = async (req, res) => {
     try {
         const { songName, selectedInstrument, lyrics } = req.body;
@@ -35,16 +37,23 @@ exports.createSong = async (req, res) => {
             });
 
             // Parse each DOCX file and save its content to the lyrics array
-            docxText = await Promise.all(docxFiles.map(async (filePath) => {
-                const parsedDoc = await parseDocxText(filePath);  // Make sure this utility returns text
-                return parsedDoc;
-            }));
+            try {
+                docxText = await Promise.all(docxFiles.map(async (filePath) => {
+                    const parsedDoc = await parseDocxText(filePath);  // Make sure this utility returns text
+                    // Ensure the parsed text is a string, or join it if it's an array
+                    return Array.isArray(parsedDoc) ? parsedDoc.join('\n') : parsedDoc;
+                }));
+            } catch (error) {
+                console.error("Error parsing DOCX files:", error);
+                return res.status(500).json({ message: "Error parsing DOCX files" });
+            }
         }
 
         // Combine DOCX parsed content with the original lyrics
         parsedLyrics.forEach((verse, index) => {
             if (docxText[index]) {
-                verse.parsedDocxFile = docxText[index]; // Attach parsed DOCX text
+                // Ensure parsedDocxFile is always an array
+                verse.parsedDocxFile = Array.isArray(docxText[index]) ? docxText[index] : [docxText[index]];
             }
         });
 
@@ -65,6 +74,8 @@ exports.createSong = async (req, res) => {
     }
 };
 
+
+// ✅ Fetch a single song by ID
 // ✅ Fetch a single song by ID
 exports.getSongById = async (req, res) => {
     const songId = req.params.id;
@@ -87,6 +98,8 @@ exports.getSongById = async (req, res) => {
                 // Check if the file exists before parsing
                 if (fs.existsSync(filePath)) {
                     parsedDocxFile = await parseDocxText(filePath);
+                    // Ensure parsedDocxFile is an array
+                    parsedDocxFile = Array.isArray(parsedDocxFile) ? parsedDocxFile : [parsedDocxFile];
                 } else {
                     console.warn(`DOCX file not found: ${filePath}`);
                 }
@@ -95,7 +108,7 @@ exports.getSongById = async (req, res) => {
             return {
                 section: lyric.section,
                 lyrics: lyric.lyrics,
-                parsedDocxFile: parsedDocxFile || null  // Ensure null if no DOCX content
+                parsedDocxFile: parsedDocxFile || []  // Ensure it's an empty array if no DOCX content
             };
         }));
 
@@ -115,6 +128,7 @@ exports.getSongById = async (req, res) => {
         res.status(500).json({ message: 'Error fetching song details' });
     }
 };
+
 
 // ✅ Update an existing song
 exports.updateSong = async (req, res) => {
