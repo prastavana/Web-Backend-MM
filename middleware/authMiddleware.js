@@ -2,10 +2,12 @@ const jwt = require('jsonwebtoken');
 
 // Middleware to verify JWT
 const verifyToken = (req, res, next) => {
-    const token = req.header('Authorization');
-    if (!token) {
-        return res.status(401).json({ message: 'Access Denied' });
+    const authHeader = req.header('Authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ message: 'Access Denied: No token provided' });
     }
+
+    const token = authHeader.split(' ')[1]; // Remove "Bearer " prefix
 
     try {
         const verified = jwt.verify(token, process.env.JWT_SECRET || 'your_secret_key');
@@ -15,6 +17,7 @@ const verifyToken = (req, res, next) => {
         res.status(400).json({ message: 'Invalid Token' });
     }
 };
+
 
 // Middleware to authorize roles
 const authorizeRole = (roles) => (req, res, next) => {

@@ -178,12 +178,14 @@ const resetPassword = async (req, res) => {
 //Fetch Profile
 const getUserProfile = async (req, res) => {
     try {
-        const user = await User.findById(req.user.id).select('-password'); // Exclude password
+        console.log("User ID:", req.user?.id);
+        const user = await User.findById(req.user.id).select('-password');
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
         res.json(user);
     } catch (error) {
+        console.error("Profile fetch error:", error.message);
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
