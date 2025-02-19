@@ -7,14 +7,15 @@ const User = require('../model/User'); // Changed to CommonJ
 const config = require('../config/config');
 
 // Register a new user
-const registerUser = async (req, res) => {
+const registerUser  = async (req, res) => {
     const { name, email, password, role } = req.body;
+    let profilePicture = req.file ? req.file.path : null; // Get the uploaded file path
 
     try {
         // Check if user already exists
         const userExist = await User.findOne({ email });
         if (userExist) {
-            return res.status(400).json({ message: 'User already exists' });
+            return res.status(400).json({ message: 'User  already exists' });
         }
 
         // Hash password
@@ -25,10 +26,11 @@ const registerUser = async (req, res) => {
             email,
             password: hashedPassword, // Store the hashed password
             role,
+            profilePicture, // Save the profile picture path
         });
 
         await user.save();
-        res.status(201).json({ message: 'User registered successfully' });
+        res.status(201).json({ message: 'User  registered successfully' });
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Error registering user' });
@@ -175,50 +177,49 @@ const resetPassword = async (req, res) => {
     }
 };
 
-//Fetch Profile
+// Fetch User Profile
 const getUserProfile = async (req, res) => {
+    console.log("Decoded User ID:", req.user?.id);
+
     try {
-        console.log("User ID:", req.user?.id);
         const user = await User.findById(req.user.id).select('-password');
         if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+            return res.status(404).json({ message: "User not found" });
         }
+
         res.json(user);
     } catch (error) {
-        console.error("Profile fetch error:", error.message);
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error("Error fetching profile:", error);
+        res.status(500).json({ message: "Server error" });
     }
 };
 
-// Update User Profile
-// Update User Profile
-const updatePassword = async (req, res) => {
-    const { name, email, newPassword } = req.body; // Use newPassword instead of password
+const updateProfile = async (req, res) => {
+    const { name, email, newPassword } = req.body;
+    const userId = req.user.id; // Ensure you're extracting the user ID from the token
+    let profilePicture = req.file ? req.file.path : null; // Get the uploaded file path
 
     try {
-        const user = await User.findById(req.user.id);
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-
-        // Update user details
-        if (name) user.name = name;
-        if (email) user.email = email;
-
-        // If a new password is provided, hash it and update
+        const updateData = { name, email };
         if (newPassword) {
-            user.password = await bcrypt.hash(newPassword, 10);
+            const hashedPassword = await bcrypt.hash(newPassword, 10);
+            updateData.password = hashedPassword;
+        }
+        if (profilePicture) {
+            updateData.profilePicture = profilePicture; // Update the profile picture path
         }
 
-        await user.save();
-        res.status(200).json({ message: 'Profile updated successfully' });
-    } catch (error) {
-        console.error("Error updating profile:", error.message);
-        res.status(500).json({ message: 'Server error', error: error.message });
+        const updatedUser  = await User.findByIdAndUpdate(userId, updateData, { new: true });
+        if (!updatedUser ) {
+            return res.status(404).json({ message: 'User  not found' });
+        }
+
+        res.status(200).json({ message: 'Profile updated successfully', user: updatedUser  });
+    } catch (err) {
+        console.error("Error updating profile:", err);
+        res.status(500).json({ message: 'Error updating profile' });
     }
 };
-
-
 
 module.exports = {
     registerUser,
@@ -227,5 +228,5 @@ module.exports = {
     sendResetPasswordMail,
     resetPassword,
     getUserProfile,
-    updatePassword,
+    updateProfile,
 };

@@ -14,6 +14,7 @@ const upload = multer({
 }).fields([
     { name: "chordDiagrams", maxCount: 5 },
     { name: "docxFiles", maxCount: 10 },
+
 ]);
 
 module.exports = upload;

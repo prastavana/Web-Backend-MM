@@ -17,15 +17,18 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    profilePicture: {
+        type: String
+    },
     role: {
         type: String,
-        enum: ['user', 'admin'], // Allowed roles
-        default: 'user', // Default to 'user'
+        enum: ['user', 'admin'],
+        default: 'user',
     },
-    token:{
-        type:String,
-        default: ''
-    }
+    token: {
+        type: String,
+        default: '',
+    },
 }, { timestamps: true });
 
 const User = mongoose.model('User', userSchema);
