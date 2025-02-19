@@ -190,12 +190,9 @@ const getUserProfile = async (req, res) => {
     }
 };
 
+// Update User Profile
 const updatePassword = async (req, res) => {
-    const { currentPassword, newPassword } = req.body;
-
-    if (!currentPassword || !newPassword) {
-        return res.status(400).json({ message: 'Current and new passwords are required' });
-    }
+    const { name, email, password } = req.body;
 
     try {
         const user = await User.findById(req.user.id);
@@ -203,29 +200,22 @@ const updatePassword = async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        // Check if the current password is correct
-        const isMatch = await bcrypt.compare(currentPassword, user.password);
-        if (!isMatch) {
-            return res.status(401).json({ message: 'Current password is incorrect' });
+        // Update user details
+        if (name) user.name = name;
+        if (email) user.email = email;
+
+        // If a new password is provided, hash it and update
+        if (password) {
+            user.password = await bcrypt.hash(password, 10);
         }
 
-        // Hash the new password
-        const hashedNewPassword = await bcrypt.hash(newPassword, 10);
-
-        // Update the user's password
-        user.password = hashedNewPassword;
         await user.save();
-
-        res.status(200).json({ message: 'Password updated successfully' });
+        res.status(200).json({ message: 'Profile updated successfully' });
     } catch (error) {
-        console.error("Error updating password:", error.message);
+        console.error("Error updating profile:", error.message);
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
-
-
-
-
 
 
 
