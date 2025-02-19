@@ -1,6 +1,4 @@
 const Session = require('../model/Session');
-const path = require('path');
-const fs = require('fs');
 
 // Add a new practice session
 exports.createSession = async (req, res) => {
@@ -26,7 +24,7 @@ exports.createSession = async (req, res) => {
             description,
             duration,
             instructions,
-            file: fileUrl
+            file: fileUrl // Save file URL
         });
 
         const savedSession = await newSession.save();
