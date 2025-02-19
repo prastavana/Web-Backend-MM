@@ -191,8 +191,9 @@ const getUserProfile = async (req, res) => {
 };
 
 // Update User Profile
+// Update User Profile
 const updatePassword = async (req, res) => {
-    const { name, email, password } = req.body;
+    const { name, email, newPassword } = req.body; // Use newPassword instead of password
 
     try {
         const user = await User.findById(req.user.id);
@@ -205,8 +206,8 @@ const updatePassword = async (req, res) => {
         if (email) user.email = email;
 
         // If a new password is provided, hash it and update
-        if (password) {
-            user.password = await bcrypt.hash(password, 10);
+        if (newPassword) {
+            user.password = await bcrypt.hash(newPassword, 10);
         }
 
         await user.save();
