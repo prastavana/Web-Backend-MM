@@ -3,18 +3,18 @@ const Session = require('../model/Session');
 // Add a new practice session
 exports.createSession = async (req, res) => {
     try {
-        const { instrument, day, title, description, duration, instructions } = req.body;
+        const { instrument, day, title, description, duration, instructions, mediaUrl } = req.body;
 
-        // Validate if required fields are provided
         if (!instrument || !day || !title || !description || !duration || !instructions) {
             return res.status(400).json({ error: 'All fields are required' });
         }
 
-        // Handle file upload if exists
+        // Determine file URL: uploaded file or YouTube URL
         let fileUrl = null;
         if (req.file) {
-            // Assuming you're saving the file on the server or using cloud storage
-            fileUrl = req.file.path; // Adjust this for your file upload method
+            fileUrl = req.file.path; // Store uploaded file path
+        } else if (mediaUrl) {
+            fileUrl = mediaUrl; // Store YouTube URL
         }
 
         const newSession = new Session({
@@ -24,7 +24,7 @@ exports.createSession = async (req, res) => {
             description,
             duration,
             instructions,
-            file: fileUrl // Save file URL
+            file: fileUrl // Store file or YouTube URL
         });
 
         const savedSession = await newSession.save();
@@ -33,6 +33,7 @@ exports.createSession = async (req, res) => {
         return res.status(500).json({ error: 'An error occurred while creating the session' });
     }
 };
+
 
 // Get all practice sessions
 exports.getAllSessions = async (req, res) => {

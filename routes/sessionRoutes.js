@@ -1,10 +1,7 @@
 const express = require('express');
-const multer = require('multer'); // For file upload handling
+const uploadMiddleware = require("../middleware/uploadMiddleware"); // Import your upload middleware
 const sessionController = require('../controller/sessionController');
-const uploadMiddleware = require("../middleware/uploadMiddleware");
 const router = express.Router();
-
-
 
 // Route to create a new session
 router.post('/', uploadMiddleware, sessionController.createSession);
