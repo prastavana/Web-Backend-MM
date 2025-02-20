@@ -3,6 +3,7 @@ const Session = require('../model/Session');
 // Add a new practice session
 exports.createSession = async (req, res) => {
     try {
+        console.log(req.body); // Log the request body to see if mediaUrl is included
         const { instrument, day, title, description, duration, instructions, mediaUrl } = req.body;
 
         if (!instrument || !day || !title || !description || !duration || !instructions) {
@@ -33,6 +34,7 @@ exports.createSession = async (req, res) => {
         return res.status(500).json({ error: 'An error occurred while creating the session' });
     }
 };
+
 
 
 // Get all practice sessions
