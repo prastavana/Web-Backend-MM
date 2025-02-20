@@ -1,27 +1,31 @@
 const Quiz = require('../model/Quiz');
 const path = require('path');
-const fs = require('fs');
 
-// Function to handle adding a quiz
-exports.addQuiz = async (req, res) => {
+exports.createQuiz = async (req, res) => {
     try {
         const { day, question, options, correctAnswer } = req.body;
-
-        // Handle file upload
         const chordDiagram = req.file ? req.file.path : null;
 
         const newQuiz = new Quiz({
             day,
             question,
-            chordDiagram,
             options,
             correctAnswer,
+            chordDiagram,
         });
 
         await newQuiz.save();
         res.status(201).json({ message: 'Quiz added successfully!', quiz: newQuiz });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Failed to add quiz', error });
+        res.status(500).json({ message: 'Error adding quiz', error: error.message });
+    }
+};
+
+exports.getAllQuizzes = async (req, res) => {
+    try {
+        const quizzes = await Quiz.find();
+        res.status(200).json(quizzes);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching quizzes', error: error.message });
     }
 };

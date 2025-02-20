@@ -7,6 +7,8 @@ const songRoutes = require("./routes/songRoutes"); // Add song routes
 const uploadMiddleware = require('./middleware/uploadMiddleware');
 const session = require("./routes/songRoutes");
 const sessionRoutes = require('./routes/sessionRoutes');
+const quizRoutes = require('./routes/quizRoutes');
+
 const path = require("path"); // To serve static files for uploads
 const app = express();
 
@@ -27,7 +29,7 @@ app.use(express.json());
 app.use("/api/auth", AuthRouter);
 app.use("/api/protected", protectedRouter);
 app.use('/api/sessions', sessionRoutes);
-
+app.use('/api/quiz', quizRoutes);
 
 // Song Routes
 app.use("/api/songs", songRoutes); // Make sure this is added
