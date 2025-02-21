@@ -7,6 +7,6 @@ const router = express.Router();
 router.post('/addquiz', uploadMiddleware, quizController.createQuiz);
 
 // Route to get all quizzes
-router.get('/', quizController.getAllQuizzes);
+router.get('/getquiz', quizController.getAllQuizzes);
 
 module.exports = router;
