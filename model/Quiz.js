@@ -1,28 +1,16 @@
 const mongoose = require('mongoose');
 
 const quizSchema = new mongoose.Schema({
-    day: {
-        type: String,
-        required: true,
-    },
-    question: {
-        type: String,
-        required: true,
-    },
-    chordDiagram: {
-        type: String, // Store the file path as a string
-        required: true,
-    },
-    options: {
-        type: [String],
-        required: true,
-    },
-    correctAnswer: {
-        type: String,
-        required: true,
-    },
-});
+    day: { type: String, required: true },
+    instrument: { type: String, required: true }, // New field for instrument
+    quizzes: [
+        {
+            question: { type: String, required: true },
+            options: { type: [String], required: true },
+            correctAnswer: { type: String, required: true },
+            chordDiagram: { type: String, required: false }, // Make it optional
+        },
+    ],
+}, { timestamps: true });
 
-const Quiz = mongoose.model('Quiz', quizSchema);
-
-module.exports = Quiz;
+module.exports = mongoose.model('Quiz', quizSchema);
