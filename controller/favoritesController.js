@@ -17,51 +17,36 @@ exports.getFavorites = async (req, res) => {
 };
 
 // Add or remove a favorite song
-exports.toggleFavoriteSong = async (req, res) => {
+const toggleFavoriteSong = async (req, res) => {
+    const userId = req.user.id; // Assuming you have user ID from the token
+    const { songId } = req.body;
+
+    if (!songId) {
+        return res.status(400).json({ error: "Song ID is required" });
+    }
+
     try {
-        const userId = req.user.id; // Assuming you have user authentication middleware
-        const { songId } = req.body; // Expecting the songId in the request body
-
-        let favorites = await Favorite.findOne({ userId });
-
-        if (!favorites) {
-            favorites = new Favorite({ userId, songIds: [], lessonIds: [] });
+        // Find or create favorites entry for the user
+        let favorite = await Favorite.findOne({ userId });
+        if (!favorite) {
+            favorite = new Favorite({ userId, songIds: [], lessonIds: [] });
         }
 
-        if (favorites.songIds.includes(songId)) {
-            favorites.songIds.pull(songId); // Remove if already liked
+        // Toggle the songId in the favorites
+        if (favorite.songIds.includes(songId)) {
+            favorite.songIds = favorite.songIds.filter(id => id !== songId); // Remove from favorites
         } else {
-            favorites.songIds.push(songId); // Add if not already liked
+            favorite.songIds.push(songId); // Add to favorites
         }
 
-        await favorites.save();
-        res.json(favorites);
+        await favorite.save();
+        res.status(200).json({ message: "Favorite toggled successfully", favorite });
     } catch (error) {
-        res.status(500).json({ message: 'Server error', error });
+        console.error("Error toggling favorite:", error); // Log the error for debugging
+        res.status(500).json({ error: "Failed to toggle favorite" });
     }
 };
 
-// Add or remove a favorite lesson
-exports.toggleFavoriteLesson = async (req, res) => {
-    try {
-        const userId = req.user.id; // Assuming you have user authentication middleware
-        const { lessonId } = req.body; // Expecting the lessonId in the request body
 
-        let favorites = await Favorite.findOne({ userId });
-
-        if (!favorites) {
-            favorites = new Favorite({ userId, songIds: [], lessonIds: [] });
-        }
-
-        if (favorites.lessonIds.includes(lessonId)) {
-            favorites.lessonIds.pull(lessonId); // Remove if already liked
-        } else {
-            favorites.lessonIds.push(lessonId); // Add if not already liked
-        }
-
-        await favorites.save();
-        res.json(favorites);
-    } catch (error) {
-        res.status(500).json({ message: 'Server error', error });
-    }
-};
+// Export the toggleFavoriteSong function
+exports.toggleFavoriteSong = toggleFavoriteSong; // Add this line
